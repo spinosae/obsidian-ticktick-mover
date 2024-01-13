@@ -1,7 +1,7 @@
 {
-	"name": "ticktick",
+	"name": "ticktick-mover",
 	"version": "1.0.0",
-	"description": "ticktick for obsidian plugin",
+	"description": "This obsidian plugin import tasks from TickTick and close them in-situ, effectively using TickTick as aggregator and staging area for tasks\n\n",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

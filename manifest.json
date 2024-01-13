@@ -1,10 +1,10 @@
 {
-	"id": "ticktick",
-	"name": "TickTick",
+	"id": "ticktick-mover",
+	"name": "TickTick Mover",
 	"version": "1.0.4",
 	"minAppVersion": "0.15.0",
-	"description": "Check and create tasks in TickTick via Obsidian",
-	"author": "Viduy Cheung",
+	"description": "Import tasks from TickTick to Todoist",
+	"author": "Que Yanghua",
 	"authorUrl": "https://ticktick.com",
 	"fundingUrl": "https://ticktick.com/about/upgrade",
 	"isDesktopOnly": false
