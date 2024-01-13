@@ -1,7 +1,7 @@
 {
 	"id": "ticktick-mover",
 	"name": "TickTick Mover",
-	"version": "1.0.4",
+	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Import tasks from TickTick to Todoist",
 	"author": "Que Yanghua",
