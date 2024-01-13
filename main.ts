@@ -131,11 +131,16 @@ export default class TickTickPlugin extends Plugin {
 							return;
 						}
 						this.fetchTasks(projectId).then((projectData) => {
+							const obTasks = projectData.tasks
+								.map(
+									(task) =>
+										`- [ ] ${task.title} ${this.settings.taskMeta}`
+								)
+								.join("\n");
+							editor.replaceRange(obTasks, editor.getCursor());
+
 							projectData.tasks.forEach((task) => {
-								editor.replaceRange(
-									`- [ ] ${task.title} ${this.settings.taskMeta}\n`,
-									editor.getCursor()
-								);
+								this.closeTask(task);
 							});
 						});
 
@@ -246,6 +251,21 @@ export default class TickTickPlugin extends Plugin {
 			if (data) {
 				new Notice(`Add ${taskData.title}`);
 			}
+		} catch (error) {
+			new Notice("Add Failed");
+			return new Promise((resolve, reject) => reject(error));
+		}
+	};
+
+	closeTask = async (task: Task) => {
+		try {
+			await this.requestPOST(
+				`/open/v1/project/${task.projectId}/task/${task.id}/complete`,
+				{}
+			);
+			// if (data) {
+			// 	new Notice(`Add ${taskData.title}`);
+			// }
 		} catch (error) {
 			new Notice("Add Failed");
 			return new Promise((resolve, reject) => reject(error));
