@@ -30,6 +30,11 @@ type Project = {
 	closed: boolean;
 };
 
+type ProjectData = {
+	project: Project;
+	tasks: Task[];
+};
+
 type Task = {
 	id: string;
 	title: string;
@@ -52,6 +57,8 @@ type Column = {
 interface TickTickPluginSettings {
 	token: string;
 	projects: Project[];
+	projectToImport: string;
+	taskMeta: string;
 	avatarUrl: "";
 	name: "";
 	autoFetchData: boolean;
@@ -61,6 +68,8 @@ interface TickTickPluginSettings {
 const DEFAULT_SETTINGS: TickTickPluginSettings = {
 	token: "",
 	projects: [],
+	projectToImport: "",
+	taskMeta: "",
 	avatarUrl: "",
 	name: "",
 	autoFetchData: true,
@@ -105,6 +114,34 @@ export default class TickTickPlugin extends Plugin {
 						new Notice("Data fetched successfully");
 					} catch (error) {
 						new Notice("Data fetched failed");
+					}
+				}
+			},
+		});
+
+		this.addCommand({
+			id: "import-tasks",
+			name: "Import tasks",
+			editorCallback: async (editor) => {
+				if (this.checkUserLoginStatus()) {
+					try {
+						const projectId = this.settings.projectToImport;
+						if (!projectId) {
+							new Notice("Please configure a project to import");
+							return;
+						}
+						this.fetchTasks(projectId).then((projectData) => {
+							projectData.tasks.forEach((task) => {
+								editor.replaceRange(
+									`- [ ] ${task.title} ${this.settings.taskMeta}\n`,
+									editor.getCursor()
+								);
+							});
+						});
+
+						new Notice("Tasks imported successfully");
+					} catch (error) {
+						new Notice("Tasks imported failed");
 					}
 				}
 			},
@@ -171,6 +208,18 @@ export default class TickTickPlugin extends Plugin {
 				}
 			}
 			return new Promise((resolve, reject) => resolve("ok"));
+		} catch (error) {
+			return new Promise((resolve, reject) => reject(error));
+		}
+	};
+
+	fetchTasks = async (projectId: string): Promise<ProjectData> => {
+		try {
+			const data = await this.requestGET(
+				`/open/v1/project/${projectId}/data`
+			);
+			const projectData = data?.json as ProjectData;
+			return new Promise((resolve, reject) => resolve(projectData));
 		} catch (error) {
 			return new Promise((resolve, reject) => reject(error));
 		}
@@ -433,6 +482,40 @@ class SettingTab extends PluginSettingTab {
 						);
 					})
 			);
+
+		new Setting(containerEl)
+			.setName("Project to import")
+			.setDesc("TickTick project id to import tasks from")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.projectToImport)
+					.onChange(async (value) => {
+						this.plugin.settings.projectToImport = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Task Meta")
+			.setDesc("Meta info for task")
+			.addText((text) =>
+				text
+					.setPlaceholder("#todo")
+					.setValue(this.plugin.settings.taskMeta)
+					.onChange(async (value) => {
+						this.plugin.settings.taskMeta = value;
+						await this.plugin.saveSettings();
+					})
+			);
+		// .setDesc("TickTick project name to import tasks from")
+		// .addDropdown((projects) => {
+		// 	this.plugin.settings.projects.forEach((p) => {
+		// 		projects.addOption(p.id, p.name);
+		// 	});
+		// 	projects.onChange(async (value) => {
+		// 		this.plugin.settings.projectToImport = value;
+		// 	});
+		// });
 
 		// new Setting(containerEl)
 		// 	.setName("Clear Local Data")
